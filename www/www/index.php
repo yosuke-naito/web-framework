@@ -1,62 +1,66 @@
 <?php
 function getControllerAndIdAndMethod() {
+    $directories = explode("/", $_SERVER["REQUEST_URI"]);
     $controller = null;
     $id = null;
     $method = null;
-    $directories = explode("/", $_SERVER["PATH_INFO"]);
 
     for ($i = 0; $i < count($directories); $i++) {
         $directory = $directories[$i];
 
         if (isset($directory) && !empty($directory)) {
             switch ($i) {
-                case 1:
-                    $controller = ucfirst($directory);
-                    break;
-                case 2:
-                    if (is_numeric($directory)) {
-                        $id = $directory;
-                    } else {
-                        $method = $directory;
-                    }
+            case 1:
+                $controller = ucfirst($directory);
+                break;
+            case 2:
+                if (is_numeric($directory)) {
+                    $id = $directory;
+                } else {
+                    $method = ucfirst($directory);
+                }
 
-                    break;
-                case 3:
-                    if (isset($id) && !empty($id)) {
-                        $method = $directory;
-                    }
+                break;
+            case 3:
+                if (isset($id) && !empty($id)) {
+                    $method = ucfirst($directory);
+                }
 
-                    break;
-                default:
-                    break;
+                break;
+            default:
+                break;
             }
         }
     }
 
-    if (is_null($method) || empty($method)) {
+    if (is_null($controller) || empty($controller) || is_null($method) || empty($method)) {
+        $controller = "Index";
         $method = "index";
     }
 
-    return [$controller, $id, $method];
+    if ($_SERVER["REQUEST_METHOD"] == "GET") {
+        $method = "before" . $method;
+    } else if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        $method = "after" . $method;
+    }
+
+    return [$controller, $method, $id];
 }
 
-if (empty($_SERVER["PATH_INFO"])) {
-    include("../views/index.php");
-    exit;
-}
-
-list($controller, $id, $method) = getControllerAndIdAndMethod();
-
-if (file_exists("../controllers/".$controller.".php")) {
+function route($controller, $method, $id) {
     include("../controllers/" . $controller . ".php");
+    (new $controller())->$method($id);
+}
 
+function main() {
     try {
-        if (method_exists(new $controller(), $method)) {
-            (new $controller())->$method($id);
-	}
-    } catch (Exception $e) {
-        include("../views/index.php");
+        list($controller, $method, $id) = getControllerAndIdAndMethod();
+        route($controller, $method, $id);
+    } catch (Throwable $e) {
+        include("../controller/ErrorOrException.php");
         exit;
     }
 }
+
+main();
 ?>
