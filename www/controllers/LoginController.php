@@ -1,22 +1,10 @@
 <?php
 include("../models/LoginModel.php");
-//include("../views/LoginView.php");
 
-class LoginController {
+class LoginController extends Controller {
     public function beforeIndex() {
-        echo "<!DOCTYPE html>
-            <html>
-<head>
-<title>ログイン</title>
-</head>
-<body>
-<form action=\"/login\" method=\"POST\">
-ユーザID: <input type=\"text\" name=\"name\"></input><br/>
-パスワード: <input type=\"password\" name=\"password\"></input>
-<input type=\"submit\">
-</form>
-</body>
-</html>";
+        $smarty = $this->getSmarty();
+        $smarty->display("LoginViewBeforeIndex.html");
     }
 
     public function afterIndex() {

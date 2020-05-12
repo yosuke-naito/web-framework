@@ -1,63 +1,80 @@
 <?php
-function getControllerAndIdAndMethod() {
-    $directories = explode("/", $_SERVER["REQUEST_URI"]);
-    $controller = null;
-    $id = null;
-    $method = null;
+session_start();
 
-    for ($i = 0; $i < count($directories); $i++) {
-        $directory = $directories[$i];
+class Router {
+    private $controller = null;
+    private $id = null;
+    private $method = null;
 
-        if (isset($directory) && !empty($directory)) {
-            switch ($i) {
-            case 1:
-                $controller = ucfirst($directory);
-                break;
-            case 2:
-                if (is_numeric($directory)) {
-                    $id = $directory;
-                } else {
-                    $method = ucfirst($directory);
-                }
-
-                break;
-            case 3:
-                if (isset($id) && !empty($id)) {
-                    $method = ucfirst($directory);
-                }
-
-                break;
-            default:
-                break;
-            }
+    private function correctController() {
+        if (is_null($this->controller) || empty($this->controller)) {
+            $this->controller = "IndexController";
         }
     }
 
-    if (is_null($controller) || empty($controller) || is_null($method) || empty($method)) {
-        $controller = "Index";
-        $method = "index";
+    private function correctMethod() {
+        if (is_null($this->method) || empty($this->method)) {
+            $this->method = "Index";
+        }
     }
 
-    if ($_SERVER["REQUEST_METHOD"] == "GET") {
-        $method = "before" . $method;
-    } else if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $method = "after" . $method;
+    private function modifyMethod() {
+        if ($_SERVER["REQUEST_METHOD"] == "GET") {
+            $this->method = "before" . $this->method;
+        } else if ($_SERVER["REQUEST_METHOD"] == "POST") {
+            $this->method = "after" . $this->method;
+        }
     }
 
-    return [$controller, $method, $id];
-}
+    public function setControllerAndIdAndMethod($directories) {
+        for ($i = 0; $i < count($directories); $i++) {
+            $directory = $directories[$i];
 
-function route($controller, $method, $id) {
-    include("../controllers/" . $controller . ".php");
-    (new $controller())->$method($id);
+            if (isset($directory) && !empty($directory)) {
+                switch ($i) {
+                case 1:
+                    $this->controller = ucfirst($directory) . "Controller";
+                    break;
+                case 2:
+                    if (is_numeric($directory)) {
+                        $this->id = $directory;
+                    } else {
+                        $this->method = ucfirst($directory);
+                    }
+
+                    break;
+                case 3:
+                    if (isset($this->id) && !empty($this->id)) {
+                        $this->method = ucfirst($directory);
+                    }
+
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+
+        $this->correctController();
+        $this->correctMethod();
+        $this->modifyMethod();
+    }
+
+    public function route() {
+        include("../controllers/" . $this->controller . ".php");
+        (new $this->controller())->{$this->method}($this->id);
+    }
 }
 
 function main() {
     try {
-        list($controller, $method, $id) = getControllerAndIdAndMethod();
-        route($controller, $method, $id);
+        $router = new Router();
+        $router->setControllerAndIdAndMethod(explode("/", $_SERVER["REQUEST_URI"]));
+        $router->route();
     } catch (Throwable $e) {
-        include("../controller/ErrorOrException.php");
+        error_log($e);
+        include("../controllers/ErrorOrExceptionController.php");
+        (new ErrorOrExceptionController())->beforeIndex();
         exit;
     }
 }
