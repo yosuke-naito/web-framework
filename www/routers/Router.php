@@ -4,34 +4,52 @@ class Router {
     private $id = null;
     private $method = null;
 
-    public function createControllerAndIdAndMethod() {
-        $controller = null;
-        $id = null;
-        $method = null;
-        $directories = explode("/", $_SERVER["REQUEST_URI"]);
+    private function setController($directory) {
+        $this->controller = ucfirst($directory) . "Controller";
+    }
 
+    private function setIdOrMethod($directory) {
+        if (is_numeric($directory)) {
+            $this->id = $directory;
+        } else {
+            $this->method = $directory;
+        }
+    }
+
+    private function setMethod($directory) {
+        if (isset($this->id) && !empty($this->id)) {
+            $this->method = $directory;
+        }
+    }
+
+    private function correctController() {
+        if (is_null($this->controller) || empty($this->controller)) {
+            $this->controller = "IndexController";
+        }
+    }
+
+    private function correctMethod() {
+        if (is_null($this->method) || empty($this->method)) {
+            $this->method = "index";
+        }
+
+        $this->method = $this->method . $_SERVER["REQUEST_METHOD"];
+    }
+
+    private function setControllerAndIdAndMethod($directories) {
         for ($i = 0; $i < count($directories); $i++) {
             $directory = $directories[$i];
 
             if (isset($directory) && !empty($directory)) {
                 switch ($i) {
                 case 1:
-                    $controller = ucfirst($directory) . "Controller";
+                    $this->setController($directory);
                     break;
                 case 2:
-                    if (is_numeric($directory)) {
-                        $id = $directory;
-                    } else {
-                        $id = null;
-                        $method = ucfirst($directory);
-                    }
-
+                    $this->setIdOrMethod($directory);
                     break;
                 case 3:
-                    if (isset($this->id) && !empty($this->id)) {
-                        $method = ucfirst($directory);
-                    }
-
+                    $this->setMethod($directory);
                     break;
                 default:
                     break;
@@ -39,40 +57,14 @@ class Router {
             }
         }
 
-        if (is_null($this->controller) || empty($this->controller)) {
-            $controller = "IndexController";
-        }
-
-        if (is_null($this->method) || empty($this->method)) {
-            $method = "index";
-        }
-
-        return [$controller, $id, $method];
-    }
-
-    public function getControllerAndIdAndMethod() {
-        return [$this->controller, $this->id, $this->method];
-    }
-
-    public function setControllerAndIdAndMethod($controller, $id, $method) {
-        $this->controller = $controller;
-        $this->id = $id;
-        $this->method = $method;
-    }
-
-    public function route($modifier) {
-        require_once("../controllers/" . $this->controller . ".php");
-        (new $this->controller())->{$this->method . $modifier}();
+        $this->correctController();
+        $this->correctMethod();
     }
 
     public function execute() {
-        if (!is_null($this->controller) && !is_null($this->method)) {
-            $this->route("After");
-        }
-
-        list($controller, $id, $method) = $this->createControllerAndIdAndMethod();
-        $this->setControllerAndIdAndMethod($controller, $id, $method);
-        $this->route("Before");
+        $this->setControllerAndIdAndMethod(explode("/", $_SERVER["REQUEST_URI"]));
+        require_once("../controllers/" . $this->controller . ".php");
+        (new $this->controller())->{$this->method}($this->id);
     }
 }
 ?>

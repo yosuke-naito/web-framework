@@ -2,18 +2,15 @@
 require_once("../controllers/Controller.php");
 
 class IndexController extends Controller {
-    public function indexBefore() {
+    public function indexGET($id) {
         if (!$this->checkLogin()) {
-            $this->delegateToLogin();
+            $this->delegateToLoginController();
 
             return;
         }
 
         $smarty = $this->getSmarty();
-        $smarty->display("IndexViewIndexBefore.html");
-    }
-
-    public function indexAfter() {
+        $smarty->display("LoginViewIndexGET.html");
     }
 }
 ?>

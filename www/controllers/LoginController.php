@@ -3,29 +3,21 @@ require_once("../controllers/Controller.php");
 require_once("../models/LoginModel.php");
 
 class LoginController extends Controller {
-    public function indexBefore() {
+    public function indexGET($id) {
         $smarty = $this->getSmarty();
-        $controller = lcfirst(substr($_SESSION["controllerBeforeLogin"], 0, -10));
-        $id = $_SESSION["idBeforeLogin"];
-        $method = $_SESSION["methodBeforeLogin"];
-        $action = null;
-
-        if (is_null($id)) {
-            $action = "/" . $controller . "/" . $method . "/";
-        } else {
-            $action = "/" . $controller . "/" . $id . "/" . $method . "/";
-        }
-
-        $smarty->assign("action", $action);
-        $smarty->display("LoginViewIndexBefore.html");
+        $smarty->display("LoginViewIndexGET.html");
     }
 
-    public function indexAfter() {
+    public function indexPOST($id) {
+        $smarty = $this->getSmarty();
         $loginModel = new LoginModel();
 
         if ($loginModel->checkLogin()) {
             session_regenerate_id();
             $_SESSION["userId"] = $loginModel->getUserId();
+            $smarty->display("LoginViewIndexPOST.html");
+        } else {
+            $smarty->display("LoginViewIndexGET.html");
         }
     }
 }

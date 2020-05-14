@@ -6,15 +6,9 @@ class Controller {
         return isset($_SESSION["userId"]);
     }
 
-    protected function delegate($controller, $method) {
-        require_once("../controllers/" . $controller . ".php");
-        (new $controller())->{$method}();
-    }
-
-    protected function delegateToLogin() {
-        list($_SESSION["controllerBeforeLogin"], $_SESSION["idBeforeLogin"], $_SESSION["methodBeforeLogin"]) = $_SESSION["router"]->getControllerAndIdAndMethod();
-        $_SESSION["router"]->setControllerAndIdAndMethod("LoginController", null, "index");
-        $this->delegate("LoginController", "indexBefore");
+    protected function delegateToLoginController() {
+        require_once("../controllers/LoginController.php");
+        (new LoginController())->indexGET(null);
     }
 
     protected function getSmarty() {
