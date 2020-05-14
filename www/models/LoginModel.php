@@ -7,8 +7,8 @@ class LoginModel {
     }
 
     public function checkLogin() {
-        if ($_POST["name"] === "yosuke_naito" && $_POST["password"] === "password") {
-            $this->userId = $_POST["name"];
+        if ($_POST["userId"] === "yosuke_naito" && $_POST["password"] === "password") {
+            $this->userId = $_POST["userId"];
 
             return true;
         } else {

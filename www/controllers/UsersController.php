@@ -1,5 +1,5 @@
 <?php
-include("../controllers/Controller.php");
+require_once("../controllers/Controller.php");
 
 class UsersController extends Controller {
     private $id;

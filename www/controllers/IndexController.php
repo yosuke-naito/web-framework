@@ -1,16 +1,19 @@
 <?php
-include("../controllers/Controller.php");
+require_once("../controllers/Controller.php");
 
 class IndexController extends Controller {
-    public function beforeIndex() {
+    public function indexBefore() {
         if (!$this->checkLogin()) {
             $this->delegateToLogin();
 
             return;
         }
 
-        echo "hello, world";
-        echo "<form method=\"POST\" name=\"form1\" action=\"/logout\"><a href=\"javascript:form1.submit()\">ログアウト</a></form>";
+        $smarty = $this->getSmarty();
+        $smarty->display("IndexViewIndexBefore.html");
+    }
+
+    public function indexAfter() {
     }
 }
 ?>

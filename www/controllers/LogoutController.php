@@ -1,13 +1,17 @@
 <?php
-include("../controllers/IndexController.php");
+require_once("../controllers/Controller.php");
 
-class LogoutController {
-    public function beforeIndex() {
+class LogoutController extends Controller {
+    public function indexBefore() {
+        require_once("../routers/Router.php");
+        $_SESSION = array();
+        session_destroy();
+        $_SESSION["router"] = new Router();
+        $_SESSION["router"]->setControllerAndIdAndMethod("IndexController", null, "index");
+        $this->delegate("IndexController", "indexBefore");
     }
 
-    public function afterIndex() {
-        session_destroy();
-        echo "ログアウトしました。<br/><a href=\"/\">ホームページに戻る</a>";
+    public function indexAfter() {
     }
 }
 ?>
