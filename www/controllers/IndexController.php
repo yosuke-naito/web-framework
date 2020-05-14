@@ -2,7 +2,7 @@
 require_once("../controllers/Controller.php");
 
 class IndexController extends Controller {
-    public function indexGET($id) {
+    public function indexGET() {
         if (!$this->checkLogin()) {
             $this->delegateToLoginController();
 

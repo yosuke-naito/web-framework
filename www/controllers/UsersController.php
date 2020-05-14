@@ -2,24 +2,31 @@
 require_once("../controllers/Controller.php");
 
 class UsersController extends Controller {
-    private $id;
-
-    public function beforeIndex() {
+    public function indexGET() {
         if (!$this->checkLogin()) {
-            $this->delegateToLogin();
+            $this->delegateToLoginController();
 
             return;
         }
 
-        echo "<form method=\"POST\" name=\"form1\" action=\"/logout\"><a href=\"javascript:form1.submit()\">ログアウト</a></form>";
+        $smarty = $this->getSmarty();
+        $smarty->display("UsersViewIndexGET.html");
     }
 
-    public function afterIndex() {
-    }
-
-    public function beforeEdit($id) {
+    public function indexWithIdGET($id) {
         if (!$this->checkLogin()) {
-            $this->delegateToLogin();
+            $this->delegateToLoginController();
+
+            return;
+        }
+
+        $smarty = $this->getSmarty();
+        $smarty->display("UsersViewIndexWithIdGET.html");
+    }
+
+    public function editWithIdGET($id) {
+        if (!$this->checkLogin()) {
+            $this->delegateToLoginController();
 
             return;
         }
@@ -28,10 +35,23 @@ class UsersController extends Controller {
             throw new Exception();
 	}
 
-        echo $id . "<br/>";
+        $smarty = $this->getSmarty();
+        $smarty->display("UsersViewEditWithIdGET.html");
     }
 
-    public function afterEdit() {
+    public function editWithIdPOST($id) {
+        if (!$this->checkLogin()) {
+            $this->delegateToLoginController();
+
+            return;
+        }
+
+        if (is_null($id) || empty($id)) {
+            throw new Exception();
+	}
+
+        $smarty = $this->getSmarty();
+        $smarty->display("UsersViewEditWithIdPOST.html");
     }
 }
 ?>

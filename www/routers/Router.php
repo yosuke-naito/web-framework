@@ -33,6 +33,10 @@ class Router {
             $this->method = "index";
         }
 
+        if (isset($this->id) && !empty($this->id)) {
+            $this->method = $this->method . "WithId";
+        }
+
         $this->method = $this->method . $_SERVER["REQUEST_METHOD"];
     }
 
@@ -61,10 +65,18 @@ class Router {
         $this->correctMethod();
     }
 
+    private function route() {
+        if (isset($this->id) && !empty($this->id)) {
+            (new $this->controller())->{$this->method}($this->id);
+        } else {
+            (new $this->controller())->{$this->method}();
+        }
+    }
+
     public function execute() {
         $this->setControllerAndIdAndMethod(explode("/", $_SERVER["REQUEST_URI"]));
         require_once("../controllers/" . $this->controller . ".php");
-        (new $this->controller())->{$this->method}($this->id);
+        $this->route();
     }
 }
 ?>

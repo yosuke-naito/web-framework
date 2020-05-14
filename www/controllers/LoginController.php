@@ -3,12 +3,12 @@ require_once("../controllers/Controller.php");
 require_once("../models/LoginModel.php");
 
 class LoginController extends Controller {
-    public function indexGET($id) {
+    public function indexGET() {
         $smarty = $this->getSmarty();
         $smarty->display("LoginViewIndexGET.html");
     }
 
-    public function indexPOST($id) {
+    public function indexPOST() {
         $smarty = $this->getSmarty();
         $loginModel = new LoginModel();
 
